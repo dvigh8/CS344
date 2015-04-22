@@ -1,0 +1,177 @@
+#ifndef BST_H
+#define BST_H
+
+#include "tree.h"
+
+// Binary Search Tree
+template <class T>
+class BST : public Tree<T> {
+public:
+	// constructors
+	BST( const T &v )
+		: Tree<T>(v) {}
+
+	BST( const T &v, BST<T> *l, BST<T> *r )
+		: Tree<T>(v,l,r) {}
+
+	BST( const T &v, BST<T> *l, BST<T> *r, BST<T> *p )
+		: Tree<T>(v,l,r,p) {}
+
+
+	// unvirtualized utilities
+	BST<T> * search( const T &v );
+		// returns pointer to node (containing value, if exists) or NULL (otherwise)
+
+	BST<T> * insert( const T &v );
+		// returns pointer to updated tree (which contains value)
+
+	BST<T> * remove( const T &v );
+		// returns pointer to updated tree (which no longer contains value)
+
+};
+
+
+template <class T>
+BST<T> * BST<T>::insert(const T & v)
+{
+    if(v < this->value){
+
+        if(this->left != NULL){
+        this->left = this->left->insert(v);}
+        else {this->left = new BST<T>(v);
+        this->left->setParent(this);
+        }
+}
+    else if (v > this->value ){
+        if(this->right != NULL){
+        this->right = this->right->insert(v);
+        }
+        else {this->right = new BST<T>(v);
+        this->right->setParent(this);
+        }
+    }
+    return this;
+}
+
+template <class T>
+BST<T> * BST<T>::search(const T & v)
+{
+
+    if(v==this->value){ return this;}
+
+    else if(v<this->value && this->left != NULL){
+
+        BST<T> * left = dynamic_cast<BST<T>*>(this->left);
+        return left->search(v);
+    }
+    else if (v>this->value && this->right != NULL){
+
+        BST<T> * right = dynamic_cast<BST<T>*>(this->right);
+        return right->search(v);
+        }
+
+    else {return NULL;}
+
+
+}
+
+template <class T>
+BST<T> * BST<T>::remove(const T & v)
+{
+    BST<T> *found = this->search(v);
+    if(found == NULL){return this;}// value does not exist
+    else if (found->left == NULL && found->right == NULL){
+
+        BST<T>*parent = dynamic_cast<BST<T>*>(found->parent);
+        if (parent != NULL){
+            if(parent->left == found){parent->setLeft(NULL);delete found;}
+            else if (parent->right == found){parent->setRight(NULL);delete found;}
+            return this;
+        }
+               else //{
+//        if (found->right == NULL){
+//            BST<T>*next = dynamic_cast<BST<T>*>(found->left);
+//            found = next;
+            return this;
+    //    }
+
+
+      //  }
+
+//       return this;
+
+    }
+    else if (found->right != NULL && found->left == NULL){
+
+        BST<T> *parent = dynamic_cast<BST<T>*>(found->parent);
+        BST<T> *right = dynamic_cast<BST<T>*>(found->right);
+
+        parent->setRight(right);
+        right->setParent(parent);
+        delete found;
+        return this;
+
+
+    }
+    else if (found->left != NULL && found->right == NULL){
+
+        BST<T> *parent = dynamic_cast<BST<T>*>(found->parent);
+        BST<T> *left = dynamic_cast<BST<T>*>(found->left);
+
+        parent->setRight(left);
+        left->setParent(parent);
+        delete found;
+        return this;
+
+
+    }
+    else if (found->left != NULL && found->right != NULL){
+
+        BST<T> *parent_found = dynamic_cast<BST<T>*>(found->parent);
+        BST<T> *left_found = dynamic_cast<BST<T>*>(found->left);
+        BST<T>*right_found = dynamic_cast<BST<T>*>(found->right);
+        if(left_found->right != NULL){
+
+            right_found->insert(left_found->right->getValue());
+            BST<T> *right_pointer = dynamic_cast<BST<T>*>(right_found->search(left_found->right->getValue()));
+            BST<T> *right_pointer_parent = dynamic_cast<BST<T>*>(right_pointer->parent);
+
+            right_pointer_parent->setLeft(left_found->right);
+            right_pointer_parent->left->setParent(right_pointer_parent);
+            left_found->setRight(right_found);
+            right_found->setParent(left_found);
+
+            if(parent_found->left == found){
+                parent_found->setLeft(left_found);
+            }
+            else {parent_found->setRight(left_found);}
+            left_found->setParent(parent_found);
+            delete found;
+            return this;
+
+
+
+
+        }
+        else {
+            left_found->setRight(right_found);
+            right_found->setParent(left_found);
+
+
+
+            if(parent_found->left == found){
+                parent_found->setLeft(left_found);
+            }
+            else {parent_found->setRight(left_found);}
+            left_found->setParent(parent_found);
+            delete found;
+            return this;
+        }
+
+
+
+        return this;
+    }
+}
+#endif
+
