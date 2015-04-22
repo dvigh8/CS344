@@ -30,7 +30,6 @@ public:
 
 };
 
-
 template <class T>
 BST<T> * BST<T>::insert(const T & v)
 {
@@ -69,10 +68,7 @@ BST<T> * BST<T>::search(const T & v)
         BST<T> * right = dynamic_cast<BST<T>*>(this->right);
         return right->search(v);
         }
-
     else {return NULL;}
-
-
 }
 
 template <class T>
@@ -80,56 +76,36 @@ BST<T> * BST<T>::remove(const T & v)
 {
     BST<T> *found = this->search(v);
     if(found == NULL){return this;}// value does not exist
-    else if (found->left == NULL && found->right == NULL){
-
-        BST<T>*parent = dynamic_cast<BST<T>*>(found->parent);
-        if (parent != NULL){
+    else{
+    BST<T>*parent = dynamic_cast<BST<T>*>(found->parent);
+    if(parent != NULL){
+    if (found->left == NULL && found->right == NULL){
             if(parent->left == found){parent->setLeft(NULL);delete found;}
-            else if (parent->right == found){parent->setRight(NULL);delete found;}
+            else {parent->setRight(NULL);delete found;}
             return this;
-        }
-               else //{
-//        if (found->right == NULL){
-//            BST<T>*next = dynamic_cast<BST<T>*>(found->left);
-//            found = next;
-            return this;
-    //    }
-
-
-      //  }
-
-//       return this;
-
     }
     else if (found->right != NULL && found->left == NULL){
 
-        BST<T> *parent = dynamic_cast<BST<T>*>(found->parent);
         BST<T> *right = dynamic_cast<BST<T>*>(found->right);
 
         parent->setRight(right);
         right->setParent(parent);
         delete found;
         return this;
-
-
     }
     else if (found->left != NULL && found->right == NULL){
 
-        BST<T> *parent = dynamic_cast<BST<T>*>(found->parent);
         BST<T> *left = dynamic_cast<BST<T>*>(found->left);
 
         parent->setRight(left);
         left->setParent(parent);
         delete found;
         return this;
-
-
     }
     else if (found->left != NULL && found->right != NULL){
 
-        BST<T> *parent_found = dynamic_cast<BST<T>*>(found->parent);
         BST<T> *left_found = dynamic_cast<BST<T>*>(found->left);
-        BST<T>*right_found = dynamic_cast<BST<T>*>(found->right);
+        BST<T> *right_found = dynamic_cast<BST<T>*>(found->right);
         if(left_found->right != NULL){
 
             right_found->insert(left_found->right->getValue());
@@ -141,37 +117,78 @@ BST<T> * BST<T>::remove(const T & v)
             left_found->setRight(right_found);
             right_found->setParent(left_found);
 
-            if(parent_found->left == found){
-                parent_found->setLeft(left_found);
+            if(parent->left == found){
+                parent->setLeft(left_found);
             }
-            else {parent_found->setRight(left_found);}
-            left_found->setParent(parent_found);
+            else {parent->setRight(left_found);}
+            left_found->setParent(parent);
             delete found;
             return this;
-
-
-
-
         }
         else {
             left_found->setRight(right_found);
             right_found->setParent(left_found);
 
-
-
-            if(parent_found->left == found){
-                parent_found->setLeft(left_found);
+            if(parent->left == found){
+                parent->setLeft(left_found);
             }
-            else {parent_found->setRight(left_found);}
-            left_found->setParent(parent_found);
+            else {parent->setRight(left_found);}
+            left_found->setParent(parent);
             delete found;
             return this;
         }
-
-
-
         return this;
     }
+    }// if parent != NULL
+    else{
+        if(found->right == NULL && found->left !=NULL){
+
+            BST<T> *left = dynamic_cast<BST<T>*>(found->left);
+            left->setParent(NULL);
+            delete found;
+            return left;
+        }
+        else if(found->left == NULL && found->right !=NULL){
+
+            BST<T> *right = dynamic_cast<BST<T>*>(found->right);
+
+            right->setParent(NULL);
+            delete found;
+            return right;
+        }
+        else if (found->left != NULL && found->right !=NULL){
+
+            BST<T> *left_found = dynamic_cast<BST<T>*>(found->left);
+            BST<T> *right_found = dynamic_cast<BST<T>*>(found->right);
+
+            if(left_found->right != NULL){
+
+            right_found->insert(left_found->right->getValue());
+            BST<T> *right_pointer = dynamic_cast<BST<T>*>(right_found->search(left_found->right->getValue()));
+            BST<T> *right_pointer_parent = dynamic_cast<BST<T>*>(right_pointer->parent);
+
+            right_pointer_parent->setLeft(left_found->right);
+            right_pointer_parent->left->setParent(right_pointer_parent);
+            left_found->setRight(right_found);
+            right_found->setParent(left_found);
+
+            left_found->setParent(NULL);
+            delete found;
+            return left_found;
+            }
+            else{ // left_found->right == NULL
+                left_found->setRight(right_found);
+                right_found->setParent(left_found);
+                left_found->setParent(NULL);
+                delete found;
+                return left_found;
+            }
+        }
+        else return this;
+
+    }// else parent == NULL
+
+    }// else
 }
 #endif
 
